@@ -1,4 +1,3 @@
-// components/ImageGallery.js
 import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { CartContext } from './CartContext';
@@ -13,6 +12,7 @@ const ImageGallery = () => {
   const [rating, setRating] = useState(5);
   const [username, setUsername] = useState('');
   const [userReviewed, setUserReviewed] = useState(false);
+  const [hoveredImage, setHoveredImage] = useState(null);
 
   useEffect(() => {
     const apiKey = 'YOUR_API_KEY';
@@ -79,6 +79,7 @@ const ImageGallery = () => {
   };
 
   const handleImageClick = (image) => {
+    setHoveredImage(null); // Reset hover effect when an image is clicked
     setSelectedImage(image);
     setReviewText('');
     setRating(5);
@@ -95,8 +96,8 @@ const ImageGallery = () => {
   return (
     <div className="container mx-auto mt-8">
       <h2 className="text-3xl font-bold mb-4">Mobile Phones</h2>
-      <div className="flex justify-between mb-4">
-        <div>
+      <div className="flex flex-col lg:flex-row justify-between mb-4">
+        <div className="mb-2 lg:mb-0">
           <label htmlFor="category" className="mr-2">
             Category:
           </label>
@@ -112,7 +113,7 @@ const ImageGallery = () => {
             <option value="category2">Category 2</option>
           </select>
         </div>
-        <div>
+        <div className="mb-2 lg:mb-0">
           <label htmlFor="search" className="mr-2">
             Search:
           </label>
@@ -125,56 +126,73 @@ const ImageGallery = () => {
           />
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredImages.map((image) => (
           <div
             key={image.id}
-            className="rounded-md overflow-hidden transition duration-300 transform hover:scale-105"
+            className="rounded-md overflow-hidden transition duration-300 transform hover:scale-105 relative"
+            onMouseEnter={() => setHoveredImage(image)}
+            onMouseLeave={() => setHoveredImage(null)}
             onClick={() => handleImageClick(image)}
           >
-            <div className="relative">
-              <img src={image.src.medium} alt={image.photographer} className="h-64 w-full object-cover" />
-              <button
-                onClick={() => addToCart(image)}
-                className="bg-blue-500 text-white px-4 py-2 mt-2 absolute bottom-0 left-0 right-0 opacity-0 hover:opacity-100 transition-opacity"
-              >
-                Add to Cart
-              </button>
-            </div>
-            <div className="mt-2">
-              <span className="text-gray-700 font-bold">Photographer: </span>
-              <span className="text-gray-700">{image.photographer}</span>
-            </div>
-            {image.reviews.length > 0 ? (
-              <div className="flex items-center mt-2">
-                <span className="text-gray-700 font-bold">Average Rating: </span>
-                <span className="flex items-center">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <svg
-                      key={index}
-                      xmlns="http://www.w3.org/2000/svg"
-                      className={`h-6 w-6 ${
-                        index < image.averageRating ? 'text-yellow-500' : 'text-gray-300'
-                      }`}
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 .25a.75.75 0 0 1 .6.3l3.8 5.1 5.1.8a.75.75 0 0 1 .4 1.3l-3.7 3.7 1.3 5.1a.75.75 0 0 1-1.1.9L10 15.5l-4.4 3a.75.75 0 0 1-1.1-.9l1.3-5.1-3.7-3.7a.75.75 0 0 1 .4-1.3l5.1-.8 3.8-5.1a.75.75 0 0 1 .6-.3z"
-                      />
-                    </svg>
-                  ))}
-                </span>
+            {hoveredImage === image && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-center">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <svg
+                    key={index}
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-6 w-6 ${
+                      index < image.averageRating ? 'text-yellow-500' : 'text-gray-300'
+                    }`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 .25a.75.75 0 0 1 .6.3l3.8 5.1 5.1.8a.75.75 0 0 1 .4 1.3l-3.7 3.7 1.3 5.1a.75.75 0 0 1-1.1.9L10 15.5l-4.4 3a.75.75 0 0 1-1.1-.9l1.3-5.1-3.7-3.7a.75.75 0 0 1 .4-1.3l5.1-.8 3.8-5.1a.75.75 0 0 1 .6-.3z"
+                    />
+                  </svg>
+                ))}
               </div>
-            ) : null}
+            )}
+            <img src={image.src.medium} alt={image.photographer} className="h-64 w-full object-cover" />
+            <div className="p-2">
+              <div className="flex items-center">
+                <span className="text-gray-700 font-bold">Photographer: </span>
+                <span className="text-gray-700">{image.photographer}</span>
+              </div>
+              {image.reviews.length > 0 && (
+                <div className="flex items-center">
+                  <span className="text-gray-700 font-bold">Average Rating: </span>
+                  <span className="flex items-center">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <svg
+                        key={index}
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`h-6 w-6 ${
+                          index < image.averageRating ? 'text-yellow-500' : 'text-gray-300'
+                        }`}
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 .25a.75.75 0 0 1 .6.3l3.8 5.1 5.1.8a.75.75 0 0 1 .4 1.3l-3.7 3.7 1.3 5.1a.75.75 0 0 1-1.1.9L10 15.5l-4.4 3a.75.75 0 0 1-1.1-.9l1.3-5.1-3.7-3.7a.75.75 0 0 1 .4-1.3l5.1-.8 3.8-5.1a.75.75 0 0 1 .6-.3z"
+                        />
+                      </svg>
+                    ))}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
       {selectedImage && (
-        <div className="fixed top-0 left-0 h-screen w-screen flex items-center justify-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-4 rounded-md w-1/2">
+        <div className="fixed top-1 mt-11 left-0 h-80 w-screen flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-4 rounded-md  ">
             <h2 className="text-3xl font-bold mb-4">{selectedImage.photographer}</h2>
             <div>
               <img src={selectedImage.src.original} alt={selectedImage.photographer} className="h-64 w-full object-cover" />
@@ -261,10 +279,10 @@ const ImageGallery = () => {
                       <path
                         fillRule="evenodd"
                         d="M10 .25a.75.75 0 0 1 .6.3l3.8 5.1 5.1.8a.75.75 0 0 1 .4 1.3l-3.7 3.7 1.3 5.1a.75.75 0 0 1-1.1.9L10 15.5l-4.4 3a.75.75 0 0 1-1.1-.9l1.3-5.1-3.7-3.7a.75.75 0 0 1 .4-1.3l5.1-.8 3.8-5.1a.75.75 0 0 1 .6-.3z"
-                      />
-                    </svg>
-                  ))}
-                </span>
+                    />
+                  </svg>
+                ))}
+              </span>
                 <div className="mt-2">
                   <textarea
                     id="review"
@@ -286,6 +304,7 @@ const ImageGallery = () => {
                 Close
               </button>
             </div>
+            
           </div>
         </div>
       )}
