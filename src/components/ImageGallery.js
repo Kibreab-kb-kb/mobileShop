@@ -1,8 +1,8 @@
 // ImageGallery.js (updated)
 import React, { useContext, useEffect, useState } from 'react';
-import axios from 'axios';
-import { CartContext } from './CartContext';
-
+import axios from 'axios';//importing axios dependecies
+import { CartContext } from './CartContext'; //importing
+//decalring function called image gallery
 const ImageGallery = () => {
   const [images, setImages] = useState([]);
   const { addToCart, cartItems } = useContext(CartContext);
@@ -53,4 +53,4 @@ const ImageGallery = () => {
   );
 };
 
-export default ImageGallery;
+export default ImageGallery;//exporting image gallery
